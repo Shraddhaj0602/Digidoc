@@ -125,6 +125,7 @@ export const parseOCRText = (text) => {
         quantityProduced: actual,
         rejects,
         operator,
+        employeeId: operator,
         employeeNumber: operator,
         timeTaken: ''
       });

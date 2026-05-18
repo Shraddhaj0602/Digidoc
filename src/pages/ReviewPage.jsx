@@ -23,12 +23,6 @@ export default function ReviewPage() {
           department: rec.department || '',
           shift: rec.shift || '',
           date: rec.date || '',
-          employeeNumber: rec.employeeNumber || '',
-          operationCode: rec.operationCode || '',
-          machineNumber: rec.machineNumber || '',
-          workOrderNumber: rec.workOrderNumber || '',
-          quantityProduced: rec.quantityProduced || '',
-          timeTaken: rec.timeTaken || '',
           totalProduction: rec.totalProduction || '',
           remarks: rec.remarks || ''
         });
@@ -76,12 +70,14 @@ export default function ReviewPage() {
   const handleMachineChange = (index, field, value) => {
     const updated = [...machines];
     updated[index][field] = value;
+    if (field === 'employeeId') updated[index]['operator'] = value;
+    if (field === 'actual') updated[index]['quantityProduced'] = value;
     setMachines(updated);
   };
 
   const addMachine = () => {
     setMachines([...machines, { 
-      machineId: '', productCode: '', plan: '', actual: '', rejects: '', operator: '', timeTaken: '' 
+      machineId: '', employeeId: '', operator: '', productCode: '', workOrderNumber: '', plan: '', actual: '', quantityProduced: '', rejects: '', timeTaken: '' 
     }]);
   };
 
@@ -236,11 +232,12 @@ export default function ReviewPage() {
                   <thead style={{ background: 'rgba(0,0,0,0.2)' }}>
                     <tr>
                       <th>Machine ID</th>
+                      <th>Emp ID</th>
                       <th>Prod Code</th>
+                      <th>Work Order</th>
                       <th>Plan</th>
-                      <th>Actual (Qty Produced)</th>
+                      <th>Qty Produced</th>
                       <th>Rejects</th>
-                      <th>Operator</th>
                       <th>Time Taken (Hrs)</th>
                       <th></th>
                     </tr>
@@ -249,11 +246,12 @@ export default function ReviewPage() {
                     {machines.map((m, i) => (
                       <tr key={i}>
                         <td style={{ padding: '8px' }}><input value={m.machineId || ''} onChange={e => handleMachineChange(i, 'machineId', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
+                        <td style={{ padding: '8px' }}><input value={m.employeeId || m.operator || ''} onChange={e => handleMachineChange(i, 'employeeId', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input value={m.productCode || ''} onChange={e => handleMachineChange(i, 'productCode', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
+                        <td style={{ padding: '8px' }}><input value={m.workOrderNumber || ''} onChange={e => handleMachineChange(i, 'workOrderNumber', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input type="number" value={m.plan || ''} onChange={e => handleMachineChange(i, 'plan', e.target.value)} style={{ padding: '8px', width: '70px', fontSize: '0.85rem' }} /></td>
-                        <td style={{ padding: '8px' }}><input type="number" value={m.actual || ''} onChange={e => handleMachineChange(i, 'actual', e.target.value)} style={{ padding: '8px', width: '90px', fontSize: '0.85rem' }} /></td>
+                        <td style={{ padding: '8px' }}><input type="number" value={m.actual || m.quantityProduced || ''} onChange={e => handleMachineChange(i, 'actual', e.target.value)} style={{ padding: '8px', width: '90px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input type="number" value={m.rejects || ''} onChange={e => handleMachineChange(i, 'rejects', e.target.value)} style={{ padding: '8px', width: '70px', fontSize: '0.85rem' }} /></td>
-                        <td style={{ padding: '8px' }}><input value={m.operator || ''} onChange={e => handleMachineChange(i, 'operator', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input value={m.timeTaken || ''} onChange={e => handleMachineChange(i, 'timeTaken', e.target.value)} style={{ padding: '8px', width: '90px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}>
                           <button className="btn btn-secondary" style={{ padding: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: 'none' }} onClick={() => removeMachine(i)}>
@@ -264,7 +262,7 @@ export default function ReviewPage() {
                     ))}
                     {machines.length === 0 && (
                       <tr>
-                        <td colSpan="8" style={{ textAlign: 'center', color: 'var(--warning)', padding: '24px' }}>
+                        <td colSpan="9" style={{ textAlign: 'center', color: 'var(--warning)', padding: '24px' }}>
                           <AlertTriangle size={20} style={{ margin: '0 auto 8px' }} />
                           No machine data automatically detected.
                         </td>
@@ -288,12 +286,6 @@ export default function ReviewPage() {
             {renderField('department', 'Department')}
             {renderField('date', 'Date')}
             {renderField('shift', 'Shift')}
-            {renderField('employeeNumber', 'Employee Number')}
-            {renderField('operationCode', 'Operation Code')}
-            {renderField('machineNumber', 'Machine Number')}
-            {renderField('workOrderNumber', 'Work Order Number')}
-            {renderField('quantityProduced', 'Quantity Produced', 'number')}
-            {renderField('timeTaken', 'Time Taken')}
             {renderField('totalProduction', 'Total Production', 'number')}
             {renderField('remarks', 'Remarks')}
 

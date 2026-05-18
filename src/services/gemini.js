@@ -13,20 +13,15 @@ no markdown, no explanation:
   "department": "",
   "shift": "",
   "date": "",
-  "employeeNumber": "",
-  "operationCode": "",
-  "machineNumber": "",
-  "workOrderNumber": "",
-  "quantityProduced": null,
-  "timeTaken": "",
   "machines": [
     {
       "machineId": "",
+      "employeeId": "",
       "productCode": "",
+      "workOrderNumber": "",
       "plan": null,
       "actual": null,
       "rejects": null,
-      "operator": "",
       "timeTaken": ""
     }
   ],
@@ -37,12 +32,6 @@ no markdown, no explanation:
     "department": 0.0,
     "shift": 0.0,
     "date": 0.0,
-    "employeeNumber": 0.0,
-    "operationCode": 0.0,
-    "machineNumber": 0.0,
-    "workOrderNumber": 0.0,
-    "quantityProduced": 0.0,
-    "timeTaken": 0.0,
     "totalProduction": 0.0,
     "remarks": 0.0,
     "machines": 0.0
@@ -55,7 +44,7 @@ Rules:
 - For machines[], extract one object per machine row/operation in the document
 - Shift can be any string (e.g., A, B, C, Morning, Evening, Night, General, or any other description found in the document) — normalize/clean as a clean string
 - Date format should be DD/MM/YYYY
-- Note: 'machineId' and 'machineNumber' may be the same thing. 'operator' is the 'employeeNumber'. 'actual' is 'quantityProduced'. Map them as best as you can if the document only has one value for these pairs. For each machine row in 'machines[]', extract the specific time taken (hours/time duration) for that row (if any) and save it in the 'timeTaken' field.`;
+- Note: For each machine row in 'machines[]', extract the specific machineId/machineNumber (as machineId), employeeId (operator/employee number), productCode/operationCode (as productCode), workOrderNumber (if any), plan quantity, actual quantity produced (as actual), rejects quantity, and timeTaken (hours/duration).`;
 
 /**
  * Converts a File object to a base64 string
