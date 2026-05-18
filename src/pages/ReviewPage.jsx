@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getRecordById, updateRecord, deleteRecord } from '../lib/firebase';
 import { motion } from 'framer-motion';
-import { CheckCircle, AlertTriangle, Save, ArrowLeft, Plus, Trash2, ShieldAlert } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Save, ArrowLeft, Plus, Trash2, ShieldAlert, X } from 'lucide-react';
 
 export default function ReviewPage() {
   const { id } = useParams();
@@ -11,6 +11,7 @@ export default function ReviewPage() {
   const [formData, setFormData] = useState({});
   const [machines, setMachines] = useState([]);
   const [errors, setErrors] = useState({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchRecord = async () => {
@@ -49,7 +50,6 @@ export default function ReviewPage() {
       error = 'Required field';
     } else {
       if (name === 'totalProduction' && (isNaN(value) || Number(value) < 0)) error = 'Must be a positive number';
-      if (name === 'shift' && !['A', 'B', 'C'].includes(value)) error = 'Must be A, B, or C';
     }
     return error;
   };
@@ -81,7 +81,7 @@ export default function ReviewPage() {
 
   const addMachine = () => {
     setMachines([...machines, { 
-      machineId: '', productCode: '', plan: '', actual: '', rejects: '', operator: '' 
+      machineId: '', productCode: '', plan: '', actual: '', rejects: '', operator: '', timeTaken: '' 
     }]);
   };
 
@@ -99,11 +99,14 @@ export default function ReviewPage() {
     navigate('/history');
   };
 
-  const handleDeleteRecord = async () => {
-    if (window.confirm("Are you sure you want to delete this record?")) {
-      await deleteRecord(id);
-      navigate('/history');
-    }
+  const handleDeleteRecord = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteRecord = async () => {
+    await deleteRecord(id);
+    setShowDeleteModal(false);
+    navigate('/history');
   };
 
   if (!record) return <div style={{ padding: '48px' }}><div className="loader"></div></div>;
@@ -216,25 +219,12 @@ export default function ReviewPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <h2 style={{ marginBottom: '24px' }}>Extracted Fields</h2>
-
           <form onSubmit={e => e.preventDefault()} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-            {renderField('plant', 'Plant')}
-            {renderField('department', 'Department')}
-            {renderField('date', 'Date')}
-            {renderField('shift', 'Shift (A/B/C)')}
-            {renderField('employeeNumber', 'Employee Number')}
-            {renderField('operationCode', 'Operation Code')}
-            {renderField('machineNumber', 'Machine Number')}
-            {renderField('workOrderNumber', 'Work Order Number')}
-            {renderField('quantityProduced', 'Quantity Produced', 'number')}
-            {renderField('timeTaken', 'Time Taken')}
-            {renderField('totalProduction', 'Total Production', 'number')}
-            {renderField('remarks', 'Remarks')}
-
-            <div style={{ gridColumn: '1 / -1', marginTop: '16px' }}>
+            
+            {/* 1. Machines Array Section (First!) */}
+            <div style={{ gridColumn: '1 / -1', marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '1.1rem' }}>Machines Array</h3>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-main)' }}>Machines Array</h3>
                 <span className={`badge ${isMachinesLowConf ? 'confidence-low' : 'confidence-high'}`} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   {isMachinesLowConf && <AlertTriangle size={14} />}
                   {(machinesConf * 100).toFixed(0)}% Overall AI Conf
@@ -248,9 +238,10 @@ export default function ReviewPage() {
                       <th>Machine ID</th>
                       <th>Prod Code</th>
                       <th>Plan</th>
-                      <th>Actual</th>
+                      <th>Actual (Qty Produced)</th>
                       <th>Rejects</th>
                       <th>Operator</th>
+                      <th>Time Taken (Hrs)</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -260,9 +251,10 @@ export default function ReviewPage() {
                         <td style={{ padding: '8px' }}><input value={m.machineId || ''} onChange={e => handleMachineChange(i, 'machineId', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input value={m.productCode || ''} onChange={e => handleMachineChange(i, 'productCode', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input type="number" value={m.plan || ''} onChange={e => handleMachineChange(i, 'plan', e.target.value)} style={{ padding: '8px', width: '70px', fontSize: '0.85rem' }} /></td>
-                        <td style={{ padding: '8px' }}><input type="number" value={m.actual || ''} onChange={e => handleMachineChange(i, 'actual', e.target.value)} style={{ padding: '8px', width: '70px', fontSize: '0.85rem' }} /></td>
+                        <td style={{ padding: '8px' }}><input type="number" value={m.actual || ''} onChange={e => handleMachineChange(i, 'actual', e.target.value)} style={{ padding: '8px', width: '90px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input type="number" value={m.rejects || ''} onChange={e => handleMachineChange(i, 'rejects', e.target.value)} style={{ padding: '8px', width: '70px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}><input value={m.operator || ''} onChange={e => handleMachineChange(i, 'operator', e.target.value)} style={{ padding: '8px', fontSize: '0.85rem' }} /></td>
+                        <td style={{ padding: '8px' }}><input value={m.timeTaken || ''} onChange={e => handleMachineChange(i, 'timeTaken', e.target.value)} style={{ padding: '8px', width: '90px', fontSize: '0.85rem' }} /></td>
                         <td style={{ padding: '8px' }}>
                           <button className="btn btn-secondary" style={{ padding: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: 'none' }} onClick={() => removeMachine(i)}>
                             <Trash2 size={16} />
@@ -272,7 +264,7 @@ export default function ReviewPage() {
                     ))}
                     {machines.length === 0 && (
                       <tr>
-                        <td colSpan="7" style={{ textAlign: 'center', color: 'var(--warning)', padding: '24px' }}>
+                        <td colSpan="8" style={{ textAlign: 'center', color: 'var(--warning)', padding: '24px' }}>
                           <AlertTriangle size={20} style={{ margin: '0 auto 8px' }} />
                           No machine data automatically detected.
                         </td>
@@ -286,6 +278,26 @@ export default function ReviewPage() {
               </button>
             </div>
 
+            <div style={{ gridColumn: '1 / -1', borderTop: '1px solid var(--card-border)', margin: '16px 0 8px 0' }} />
+
+            {/* 2. General Extracted Fields Section (Below!) */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <h2 style={{ marginBottom: '24px', fontSize: '1.3rem', color: 'var(--text-main)' }}>Extracted Fields</h2>
+            </div>
+            {renderField('plant', 'Plant')}
+            {renderField('department', 'Department')}
+            {renderField('date', 'Date')}
+            {renderField('shift', 'Shift')}
+            {renderField('employeeNumber', 'Employee Number')}
+            {renderField('operationCode', 'Operation Code')}
+            {renderField('machineNumber', 'Machine Number')}
+            {renderField('workOrderNumber', 'Work Order Number')}
+            {renderField('quantityProduced', 'Quantity Produced', 'number')}
+            {renderField('timeTaken', 'Time Taken')}
+            {renderField('totalProduction', 'Total Production', 'number')}
+            {renderField('remarks', 'Remarks')}
+
+            {/* 3. Action Buttons */}
             <div style={{ gridColumn: '1 / -1', marginTop: '32px', display: 'flex', justifyContent: 'flex-end', gap: '16px', borderTop: '1px solid var(--card-border)', paddingTop: '24px' }}>
               <button className="btn btn-secondary" onClick={() => navigate('/history')}>Cancel</button>
               <button 
@@ -302,6 +314,108 @@ export default function ReviewPage() {
           </form>
         </motion.div>
       </div>
+
+      {/* Sleek Custom Slate-Glass Deletion Modal */}
+      {showDeleteModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(5, 8, 22, 0.75)',
+          backdropFilter: 'blur(16px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 99999,
+          padding: '24px'
+        }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(22, 28, 45, 0.8), rgba(15, 18, 36, 0.95))',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '24px',
+              padding: '32px',
+              maxWidth: '480px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              position: 'relative'
+            }}
+          >
+            <button 
+              onClick={() => setShowDeleteModal(false)}
+              style={{
+                position: 'absolute',
+                top: '24px',
+                right: '24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                borderRadius: '50%',
+                padding: '8px',
+                cursor: 'pointer',
+                color: 'var(--text-muted)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; e.currentTarget.style.color = 'var(--text-main)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            >
+              <X size={16} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                borderRadius: '16px',
+                padding: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--danger)'
+              }}>
+                <ShieldAlert size={28} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', margin: 0 }}>Delete Operational Record</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>This action is permanent and cannot be undone.</p>
+              </div>
+            </div>
+
+            <p style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '28px', background: 'rgba(255, 255, 255, 0.02)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
+              Are you sure you want to delete this digitized sheet? All extracted metrics and manual edits will be permanently wiped from the database.
+            </p>
+
+            <div style={{ display: 'flex', gap: '14px', justifyContent: 'flex-end' }}>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => setShowDeleteModal(false)}
+                style={{ padding: '12px 20px', fontSize: '0.9rem' }}
+              >
+                No, Keep Record
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={confirmDeleteRecord}
+                style={{
+                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  border: 'none',
+                  padding: '12px 22px',
+                  fontSize: '0.9rem',
+                  boxShadow: '0 8px 20px rgba(239, 68, 68, 0.25)'
+                }}
+              >
+                Yes, Delete Record
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

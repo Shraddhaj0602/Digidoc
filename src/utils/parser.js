@@ -69,13 +69,10 @@ export const parseOCRText = (text) => {
     setField('date', `${day}/${month}/${year}`, 0.95);
   }
 
-  // 4. Shift Extraction (A, B, C)
-  const shiftMatch = fullText.match(/(?:Shift)[:\-]?\s*([A-C]|1|2|3|Morning|Evening|Night)/i);
+  // 4. Shift Extraction (Any String)
+  const shiftMatch = fullText.match(/(?:Shift)[:\-]?\s*([a-zA-Z0-9]+)/i);
   if (shiftMatch) {
-    let shiftStr = shiftMatch[1].toUpperCase();
-    if (shiftStr === '1' || shiftStr === 'MORNING') shiftStr = 'A';
-    if (shiftStr === '2' || shiftStr === 'EVENING') shiftStr = 'B';
-    if (shiftStr === '3' || shiftStr === 'NIGHT') shiftStr = 'C';
+    let shiftStr = shiftMatch[1];
     setField('shift', shiftStr, 0.9);
   }
 

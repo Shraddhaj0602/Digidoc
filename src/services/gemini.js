@@ -26,7 +26,8 @@ no markdown, no explanation:
       "plan": null,
       "actual": null,
       "rejects": null,
-      "operator": ""
+      "operator": "",
+      "timeTaken": ""
     }
   ],
   "totalProduction": null,
@@ -52,9 +53,9 @@ Rules:
 - If a field is missing or illegible, return null
 - confidence_scores range from 0.0 (not found) to 1.0 (very certain)
 - For machines[], extract one object per machine row/operation in the document
-- Shift must be one of: A, B, C — normalize if needed
+- Shift can be any string (e.g., A, B, C, Morning, Evening, Night, General, or any other description found in the document) — normalize/clean as a clean string
 - Date format should be DD/MM/YYYY
-- Note: 'machineId' and 'machineNumber' may be the same thing. 'operator' is the 'employeeNumber'. 'actual' is 'quantityProduced'. Map them as best as you can if the document only has one value for these pairs.`;
+- Note: 'machineId' and 'machineNumber' may be the same thing. 'operator' is the 'employeeNumber'. 'actual' is 'quantityProduced'. Map them as best as you can if the document only has one value for these pairs. For each machine row in 'machines[]', extract the specific time taken (hours/time duration) for that row (if any) and save it in the 'timeTaken' field.`;
 
 /**
  * Converts a File object to a base64 string
